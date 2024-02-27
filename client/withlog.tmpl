@@ -23,19 +23,23 @@ func New{{$decorator}}(base {{.Interface.Type}}, wr io.Writer) {{$decorator}} {
   // {{$method.Name}} implements {{$.Interface.Type}}
   func (d {{$decorator}}) {{$method.Declaration}} {
       {{- if $method.HasParams}}
-        fmt.Fprintln(d.wr, "==== {{$decorator}}: calling {{$method.Name}} with params:", {{$method.ParamsNames}})
+        d.printDebug("{{$decorator}}: calling {{$method.Name}} with params:", {{$method.ParamsNames}})
       {{else}}
-        fmt.Fprintln(d.wr, "==== {{$decorator}}: calling {{$method.Name}}")
+        d.printDebug("{{$decorator}}: calling {{$method.Name}}")
       {{end -}}
 
       defer func() {
           {{- if $method.HasResults}}
-            fmt.Fprintln(d.wr, "{{$decorator}}: {{$method.Name}} returned results:", {{$method.ResultsNames}})
+            d.printDebug("{{$decorator}}: {{$method.Name}} returned results:", {{$method.ResultsNames}})
           {{else}}
-            fmt.Fprintln(d.wr, "{{$decorator}}: {{$method.Name}} finished")
+            d.printDebug("{{$decorator}}: {{$method.Name}} finished")
           {{end -}}
         }()
 
       {{ $method.Pass "d.base." }}
   }
 {{end}}
+
+func (d {{$decorator}}) printDebug(first string, a...any) {
+    fmt.Fprintln(d.wr, "==== " + first, a)
+}

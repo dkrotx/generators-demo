@@ -17,9 +17,9 @@ func reverse(s string) (result string) {
 	return
 }
 
-func (i impl) CallWithString(s string) string {
+func (i impl) CallWithString(s string) (string, string) {
 	fmt.Printf("Implementation.CallWithString(%s)\n", s)
-	return reverse(s)
+	return s, reverse(s)
 }
 
 func (i impl) CallWithInt(x int) int {
