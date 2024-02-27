@@ -1,0 +1,41 @@
+import (
+  "io"
+  "fmt"
+)
+
+{{ $decorator := (printf "%sWithLog" .Interface.Name) }}
+
+// {{$decorator}} implements {{.Interface.Type}} that is instrumented with logging
+type {{$decorator}} struct {
+  base {{.Interface.Type}}
+  wr io.Writer
+}
+
+// New{{$decorator}} instruments an implementation of the {{.Interface.Type}} with simple logging
+func New{{$decorator}}(base {{.Interface.Type}}, wr io.Writer) {{$decorator}} {
+  return {{$decorator}}{
+    base: base,
+    wr: wr, 
+  }
+}
+
+{{range $method := .Interface.Methods}}
+  // {{$method.Name}} implements {{$.Interface.Type}}
+  func (d {{$decorator}}) {{$method.Declaration}} {
+      {{- if $method.HasParams}}
+        fmt.Fprintln(d.wr, "==== {{$decorator}}: calling {{$method.Name}} with params:", {{$method.ParamsNames}})
+      {{else}}
+        fmt.Fprintln(d.wr, "==== {{$decorator}}: calling {{$method.Name}}")
+      {{end -}}
+
+      defer func() {
+          {{- if $method.HasResults}}
+            fmt.Fprintln(d.wr, "{{$decorator}}: {{$method.Name}} returned results:", {{$method.ResultsNames}})
+          {{else}}
+            fmt.Fprintln(d.wr, "{{$decorator}}: {{$method.Name}} finished")
+          {{end -}}
+        }()
+
+      {{ $method.Pass "d.base." }}
+  }
+{{end}}

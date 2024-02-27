@@ -13,7 +13,7 @@ func useClient(cli client.Client) {
 }
 
 func main() {
-	cli := client.NewClientWithLog(os.Stdout)
+	cli := client.NewClientWithLog(client.NewBaseClient(), os.Stdout)
 
 	fmt.Println("Hello")
 	useClient(cli)
