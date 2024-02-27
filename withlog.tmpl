@@ -1,0 +1,31 @@
+import (
+  "io"
+  "fmt"
+)
+
+{{ $decorator := (printf "%sWithLog" .Interface.Name) }}
+
+// {{$decorator}} implements {{.Interface.Type}} that is instrumented with logging
+type {{$decorator}} struct {
+  wr io.Writer
+}
+
+// New{{$decorator}} instruments an implementation of the {{.Interface.Type}} with simple logging
+func New{{$decorator}}(wr io.Writer) {{$decorator}} {
+  return {{$decorator}}{
+    wr: wr, 
+  }
+}
+
+{{range $method := .Interface.Methods}}
+  // {{$method.Name}} implements {{$.Interface.Type}}
+  func (d {{$decorator}}) {{$method.Declaration}} {
+      {{- if $method.HasParams}}
+        params := []interface{}{"{{$decorator}}: calling {{$method.Name}} with params:", {{$method.ParamsNames}} }
+        
+        d.wr.Write([]byte(fmt.Sprintln(params...)))
+      {{else}}
+        d.wr.Write([]byte(fmt.Sprintln("{{$decorator}}: calling {{$method.Name}}")))
+      {{end -}}
+  }
+{{end}}
